@@ -1,0 +1,12 @@
+{
+    "name": "GrovechaosRestAPI",
+    "main": "server.js",
+    "dependencies": {
+        "express": "~4.13.2",
+        "mongoose": "*",
+        "mongoose-geojson-schema": "*",
+        "redis": "*",
+        "axios": "*",
+        "body-parser": "~1.13.3"
+    }
+}
