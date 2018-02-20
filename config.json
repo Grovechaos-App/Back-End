@@ -1,0 +1,8 @@
+{
+  "GCLOUD_PROJECT": "grovechaos-9db47",
+  "CLOUD_BUCKET": "grovechaos",
+  "DATA_BACKEND": "datastore",
+  "OAUTH2_CLIENT_ID": "277402224354-h79leii2klhc8tmqiu9ndanoms8bf0mh.apps.googleusercontent.com",
+  "OAUTH2_CLIENT_SECRET": "Ldsp4hRH0kocZU-n3XU0qewe",
+  "OAUTH2_CALLBACK": "http://localhost:8080/auth/google/callback"
+}
