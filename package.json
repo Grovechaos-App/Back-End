@@ -1,12 +1,28 @@
 {
-    "name": "GrovechaosRestAPI",
-    "main": "server.js",
-    "dependencies": {
-        "express": "~4.13.2",
-        "mongoose": "*",
-        "mongoose-geojson-schema": "*",
-        "redis": "*",
-        "axios": "*",
-        "body-parser": "~1.13.3"
-    }
+  "name": "grovechaosrestapi",
+  "version": "1.0.0",
+  "main": "driverPurger.js",
+  "dependencies": {
+    "body-parser": "*",
+    "express": "*",
+    "mongoose": "*",
+    "nconf": "^0.10.0",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexanderthanhbui/Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexanderthanhbui/Backend/issues"
+  },
+  "homepage": "https://github.com/alexanderthanhbui/Backend#readme",
+  "keywords": [],
+  "description": ""
 }

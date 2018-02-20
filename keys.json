@@ -1,0 +1,5 @@
+{
+  "redisHost": "redis-11528.c1.us-central1-2.gce.cloud.redislabs.com",
+  "redisPort": 11528,
+  "redisKey": "alexbui1"
+}

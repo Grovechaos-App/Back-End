@@ -12,19 +12,24 @@ var Driver = require('./models/driver');
 var Ride = require('./models/ride');
 
 function sendEmail() {
-   email.send(to, headers, body);
-
-   client.zrangebyscore('geo:created', 0, 1000000000000, function(err, members) {
+   client.zrangebyscore('geo:created', -Infinity, Math.floor(Date.now() / 1000) - 10, function(err, members) {
         // the resulting members would be something like
         // ['userb', '5', 'userc', '3', 'usera', '1']
         // use the following trick to convert to
         // [ [ 'userb', '5' ], [ 'userc', '3' ], [ 'usera', '1' ] ]
         // learned the trick from
         // http://stackoverflow.com/questions/8566667/split-javascript-array-in-chunks-using-underscore-js
-        client.zrem('locations', members)
-        
-    console.log(members);
-});
+            console.log(members);
+        if (members.length > 0)  {
+            console.log("deleting redis cache for both geo set and sorted set")
+            client.zrem('locations', members)
+            client.zrem('geo:created', members)
+            console.log(members);
+        } else {
+            console.log("nothing to delete in redis cache")
+            console.log(members);
+        }
+	});
 }
-setInterval(sendEmail, 10*1000);
+setInterval(function() { sendEmail() }, 1*1000);
 

@@ -49,8 +49,8 @@ router.route('/drivers')
         });
     });
 
-// Create a ride (using POST at http://localhost:8080/rides)
-router.route('/rides')
+// Create a ride to MongoDB (using POST at http://localhost:8080/rides)
+router.route('/api/rides')
     .post(function(req, res) {
         var ride = new Ride();
         // Set text and user values from the request
@@ -66,7 +66,7 @@ router.route('/rides')
     });
 
 // GET driver from redis cache, if not found, find from MongoDB and save to redis
-router.route('/latestDrivers').get(function(req,res){
+router.route('/api/latestDrivers').get(function(req,res){
   client.get('drivers', function (err, drivers) {
     if (drivers) {
     	    console.log('redis baby');
@@ -85,54 +85,41 @@ router.route('/latestDrivers').get(function(req,res){
   });
 });
 
-// Create a ride (using POST at http://localhost:8080/rides)
-router.route('/latestDrivers')
+// post location of driver to redis using geoadd and seperate sorted set (using POST at http://localhost:8080/postActiveLocation)
+router.route('/api/postActiveLocation')
     .post(function(req, res) {
     	var lng = req.body.lng;
     	var lat = req.body.lat;
-    	var driverUID = req.body.driverUID;
-    	var args = [ 'geo:created', Math.floor(new Date() / 1000), driverUID ];
+        var driver = req.body.driver;
+        var ride = req.body.ride;
+    	var args = [ 'geo:created', Math.floor(new Date() / 1000), driver ];
 client.zadd(args, function (err, response) {
     if (err) throw err;
     console.log(args);
     console.log('added '+response+' items.');
 });
-   client.geoadd('locations', lng, lat, driverUID, function (err, response) {
+   client.geoadd('locations', lng, lat, driver, function (err, response) {
     if (err) throw err;
     console.log('added '+response+' geoadds.');
    });
    //client.zadd('geo:created', date / 1000 | 0, driverUID);
 
-   client.zrangebyscore('geo:created', -Infinity, Math.floor(new Date() / 1000) - 10, function(err, members) {
+   client.zrangebyscore('geo:created', -Infinity, Math.floor(Date.now() / 1000) - 10, function(err, members) {
         // the resulting members would be something like
         // ['userb', '5', 'userc', '3', 'usera', '1']
         // use the following trick to convert to
         // [ [ 'userb', '5' ], [ 'userc', '3' ], [ 'usera', '1' ] ]
         // learned the trick from
         // http://stackoverflow.com/questions/8566667/split-javascript-array-in-chunks-using-underscore-js
-    client.zrem('locations', members)
+    //client.zrem('locations', members)
 
     console.log(members);
 });
         res.json({ ride: 'Ride created successfully!' });
     });
 
-// Get a list of nearbyDrivers (using POST at http://localhost:8080/nearbyDrivers)
-router.route('/nearbyDrivers')
-    .post(function(req, res) {
-    	var lng = req.body.lng;
-    	var lat = req.body.lat;
-    	var driverUID = req.body.driverUID;
-    	var args = [ 'geo:created', Math.floor(new Date() / 1000), driverUID ];
-
-client.zrangebyscore('geo:created', -Infinity, Math.floor(new Date() / 1000) - 10, function(err, nearbyDriver) {
-
-      res.json({ nearbyDrivers: nearbyDrivers });
-    });
-});
-
-// Get a list of nearbyDrivers (using POST at http://localhost:8080/georadius)
-router.route('/georadius')
+// Get a list of nearbyDrivers (using POST at http://localhost:8080/getActiveDriversInGeoRadius)
+router.route('/api/georadius')
     .post(function(req, res) {
     	var lng = req.body.lng;
     	var lat = req.body.lat;
@@ -142,6 +129,37 @@ client.georadius('locations', lng, lat, 10000, 'mi', 'WITHDIST', 'WITHCOORD', fu
       res.json({ nearbyDrivers: nearbyDrivers });
     });
 });
+
+var Jsonresult = {};
+var process = function(lat,lon,dist,unit)
+{
+    Jsonresult.result = 'success';
+    var vehicle_type = new Array('small','medium');  
+vehicle_type.forEach(function(vehicle) 
+{
+    calls.push(function(callback){
+        redis.georadius (vehicle,lat,lon ,dist,unit,'WITHCOORD','WITHDIST',  function  ( ERR , Result ) 
+        {
+            if (ERR) 
+            return callback(ERR);  
+
+            Jsonresult[vehicle] = Result;
+            callback(null, vehicle);
+        });
+      });
+});
+
+    async.parallel(calls, function(err, result) {
+    if (err)
+        return console.log(err);
+    res.json(Jsonresult);
+     });
+}
+
+router.route('/api/geotry')
+    .post(function(req, res) {
+
+    });
 
 // GET driver with id (using a GET at http://localhost:8080/drivers/:driver_id)
 router.route('/drivers/:driver_id')
